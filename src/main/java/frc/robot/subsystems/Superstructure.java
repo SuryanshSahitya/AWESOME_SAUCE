@@ -4,8 +4,8 @@ import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.flywheel.Flywheel;
+import frc.robot.subsystems.intake.intake;
 
 /**
  * Superstructure - Controls the Arm and Flywheel together.
@@ -25,12 +25,12 @@ import frc.robot.subsystems.flywheel.Flywheel;
 public class Superstructure extends SubsystemBase {
 
   // ==================== Subsystems ====================
-  private final Arm arm;
+  private final intake arm;
   private final Flywheel flywheel;
 
   // ==================== Constructor ====================
 
-  public Superstructure(Arm arm, Flywheel flywheel) {
+  public Superstructure(intake arm, Flywheel flywheel) {
     this.arm = arm;
     this.flywheel = flywheel;
   }

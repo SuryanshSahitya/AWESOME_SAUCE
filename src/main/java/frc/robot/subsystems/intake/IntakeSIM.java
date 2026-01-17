@@ -1,4 +1,4 @@
-package frc.robot.subsystems.arm;
+package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Radians;
@@ -23,7 +23,7 @@ import frc.robot.utils.TalonFXUtil;
  * through SmartDashboard. It uses WPILib's SingleJointedArmSim for physics simulation and
  * Mechanism2d for visualization.
  */
-public class ArmSIM extends Arm {
+public class IntakeSIM extends intake {
 
   // ==================== Physical Constants ====================
 
@@ -68,7 +68,7 @@ public class ArmSIM extends Arm {
    * <p>Initializes the physics simulation and creates the visual representation of the arm
    * mechanism on SmartDashboard.
    */
-  public ArmSIM() {
+  public IntakeSIM() {
     super();
 
     // Configure gear ratio for simulation (tells Phoenix how motor relates to sensor)

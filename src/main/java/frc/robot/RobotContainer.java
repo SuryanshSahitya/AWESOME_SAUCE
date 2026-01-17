@@ -2,6 +2,12 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
+
+
+//TODO
+// update candle from last years version using update guide
+
+
 package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
@@ -26,14 +32,15 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.autonomous.AutoCommands;
 import frc.robot.autonomous.AutoRoutines;
 import frc.robot.autonomous.LinearPathRequest;
-import frc.robot.constants.AutoConstants;
+import frc.robot.constants.Constants.IntakeConstants;
+import frc.robot.constants.Constants.PhysicalConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Superstructure;
-import frc.robot.subsystems.arm.Arm;
-import frc.robot.subsystems.arm.ArmSIM;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelSIM;
+import frc.robot.subsystems.intake.intake;
+import frc.robot.subsystems.intake.IntakeSIM;
 import frc.robot.subsystems.vision.LimelightSubsystem;
 
 /**
@@ -77,15 +84,15 @@ public class RobotContainer {
   public final AutoCommands autoCommands = new AutoCommands(
       drivetrain,
       new LinearPathRequest(
-          new Constraints(AutoConstants.MAX_LINEAR_VELOCITY_MPS, AutoConstants.MAX_LINEAR_ACCELERATION_MPS2),
-          new Constraints(AutoConstants.MAX_ANGULAR_VELOCITY_RAD_S, AutoConstants.MAX_ANGULAR_ACCELERATION_RAD_S2),
+          new Constraints(PhysicalConstants.MAX_LINEAR_VELOCITY_MPS, PhysicalConstants.MAX_LINEAR_ACCELERATION_MPS2),
+          new Constraints(PhysicalConstants.MAX_ANGULAR_VELOCITY_RAD_S, PhysicalConstants.MAX_ANGULAR_ACCELERATION_RAD_S2),
           new WheelForceCalculator(
               drivetrain.getModuleLocations(),
-              Pounds.of(AutoConstants.ROBOT_MASS_LBS),
-              KilogramSquareMeters.of(AutoConstants.MOMENT_OF_INERTIA_KG_M2))));
+              Pounds.of(PhysicalConstants.ROBOT_MASS_LBS),
+              KilogramSquareMeters.of(PhysicalConstants.MOMENT_OF_INERTIA_KG_M2))));
 
   /* Create subsystems (uses simulated versions when running in simulation) */
-  public final Arm arm = RobotBase.isSimulation() ? new ArmSIM() : new Arm();
+  public final intake arm = RobotBase.isSimulation() ? new IntakeSIM() : new intake();
   public final Flywheel flywheel = RobotBase.isSimulation() ? new FlywheelSIM() : new Flywheel();
   private final Superstructure superstructure = new Superstructure(arm, flywheel);
 

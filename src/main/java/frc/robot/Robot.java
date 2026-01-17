@@ -116,6 +116,6 @@ public class Robot extends TimedRobot {
   }
 
   public static EpilogueBackend telemetry() {
-    return Epilogue.getConfig().backend;
+   return Epilogue.getConfig().backend;
   }
 }
