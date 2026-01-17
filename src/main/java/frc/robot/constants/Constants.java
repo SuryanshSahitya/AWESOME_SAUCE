@@ -46,7 +46,7 @@ public class Constants {
     public static final class IntakeConstants{
 
     public static final double speed = 0.7;
-    public static final double unjammingspeed = 0.3;
+    public static final double unjammingspeed = -0.3;
           // ==================== PID Control Values ====================
   // TODO: CRITICAL - These control how the arm moves! Test on real robot first!
   // Start with these safe values: kG=0.2 (fights gravity), kS=0.2 (overcomes friction),
@@ -74,6 +74,33 @@ public class Constants {
 
   /** Motion Magic acceleration in rotations per second² */
   public static final double MOTION_MAGIC_ACCELERATION = 0.0; // NEEDS SETTING
+  
+
+
+
+    /** Gravity feedforward gain */
+  public static final double pkG = 0.0; // NEEDS TUNING
+
+  /** Static friction feedforward gain */
+  public static final double pkS = 0.0; // NEEDS TUNING
+
+  /** Proportional gain */
+  public static final double pkP = 0.0; // NEEDS TUNING
+
+  /** Derivative gain */
+  public static final double pkD = 0.0; // NEEDS TUNING
+
+  public static final double pivot_MOTION_MAGIC_CRUISE_VELOCITY = 0.0; // NEEDS SETTING
+
+  /** Motion Magic acceleration in rotations per second² */
+  public static final double pivot_MOTION_MAGIC_ACCELERATION = 0.0; // NEEDS SETTING
+  public static final double MOTION_MAGIC_JERK = 0.0;
+
+
+
+ //NEEDS TO BE TUNED FOR INTAKE PIVOT POSITIONS
+  public static final double pivotUp = 0.0;
+  public static final double pivotDown = 0.0;
 
   private IntakeConstants() {
     throw new UnsupportedOperationException("This is a utility class!");

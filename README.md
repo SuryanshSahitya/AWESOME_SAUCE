@@ -1,2 +1,2 @@
-# 2026RobotTemplate
-Java template for FRC 2026 Rebuilt game.
+# Team 8866 2026 Robot
+Awesome Sauce!
