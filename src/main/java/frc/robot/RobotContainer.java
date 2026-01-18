@@ -31,7 +31,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.autonomous.AutoCommands;
-import frc.robot.autonomous.AutoRoutines;
+//import frc.robot.autonomous.AutoRoutines;
 import frc.robot.autonomous.LinearPathRequest;
 import frc.robot.constants.Constants.IntakeConstants;
 import frc.robot.constants.Constants.PhysicalConstants;
