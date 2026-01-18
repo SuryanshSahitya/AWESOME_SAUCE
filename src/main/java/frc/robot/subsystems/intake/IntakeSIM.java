@@ -80,7 +80,9 @@ public class IntakeSIM extends intake {
     config.Slot0.kD = 30; // Derivative gain
     config.MotionMagic.MotionMagicCruiseVelocity = 1; // Max velocity (RPS)
     config.MotionMagic.MotionMagicAcceleration = 4; // Max acceleration (RPS²)
-    TalonFXUtil.applyConfigWithRetries(leader, config);
+    TalonFXUtil.applyConfigWithRetries(intakeL, config);
+    TalonFXUtil.applyConfigWithRetries(intakeR, config);
+
 
     // Initialize the physics simulation
     armSim =
@@ -118,7 +120,7 @@ public class IntakeSIM extends intake {
   @Override
   public void simulationPeriodic() {
     // Feed the motor voltage from the controller into the physics simulation
-    armSim.setInput(leader.getMotorVoltage().getValueAsDouble());
+    armSim.setInput(intakeL.getMotorVoltage().getValueAsDouble());
 
     // Step the simulation forward by one robot loop period
     armSim.update(SIM_PERIOD_SECONDS);
@@ -139,8 +141,8 @@ public class IntakeSIM extends intake {
     // Also update motor sim for completeness (motor rotations = encoder * gear ratio)
     double motorPosition = encoderPosition * GEAR_RATIO;
     double motorVelocity = encoderVelocity * GEAR_RATIO;
-    leader.getSimState().setRawRotorPosition(motorPosition);
-    leader.getSimState().setRotorVelocity(motorVelocity);
+    intakeL.getSimState().setRawRotorPosition(motorPosition);
+    intakeL.getSimState().setRotorVelocity(motorVelocity);
 
     // Update the visual representation
     updateVisualization();
@@ -157,9 +159,9 @@ public class IntakeSIM extends intake {
    */
   private void updateVisualization() {
     // Get current position from the base class method (reads from simulated encoder)
-    double currentAngleDeg = getPosition().in(Degrees);
+    double currentAngleDeg = encoder.getPosition().getValue().in(Degrees);
 
     // Update the mechanism visualization
-    armMechanism.update(currentAngleDeg, isAtTarget());
+    armMechanism.update(currentAngleDeg, encoder.getPosition().getValue().isNear(pivotIntakeVoltage.getPositionMeasure(), 0.5));
   }
 }

@@ -20,10 +20,11 @@ import dev.doglog.DogLog;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
-import frc.robot.constants.Constants;
+import frc.robot.constants.Constants.*;
 import frc.robot.utils.LoggedCommands;
 import frc.robot.utils.TalonFXUtil;
 
@@ -33,17 +34,20 @@ public class intake extends SubsystemBase {
   private final CANBus canivore = new CANBus("canivore");
 
   // Main motor that moves the arm (device ID 31)
-  public final TalonFX intakeL = new TalonFX(31, canivore);
-  public final TalonFX intakeR = new TalonFX(4,canivore);
-  public final TalonFX intakePivot = new TalonFX(6,canivore);
+  public final TalonFX intakeL = new TalonFX(31);
+  public final TalonFX intakeR = new TalonFX(4);
+  public final TalonFX intakePivot = new TalonFX(6);
+
+  public static CANcoder encoder = new CANcoder(32);
   
   public static String up_or_down;
+  public static double pivotPosition = 0;
 
   // Configuration settings for the arm motor
-  private TalonFXConfiguration config = new TalonFXConfiguration();
+  public TalonFXConfiguration config = new TalonFXConfiguration();
   private TalonFXConfiguration pivotconfig = new TalonFXConfiguration();
 
-   final MotionMagicVoltage pivotIntakeVoltage = new MotionMagicVoltage(0);
+  final MotionMagicVoltage pivotIntakeVoltage = new MotionMagicVoltage(0);
 
 
   // Controller for moving the arm to specific positions
@@ -57,28 +61,31 @@ public class intake extends SubsystemBase {
     //config.Slot0.GravityType = GravityTypeValue.Arm_Cosine; // Automatically fights gravity using math
 
     // Control values from ArmConstants (TODO: CRITICAL - Tune these on the real robot!)
-    config.Slot0.kG = Constants.IntakeConstants.kG; // Gravity compensation
-    config.Slot0.kS = Constants.IntakeConstants.kS; // Static friction
-    config.Slot0.kP = Constants.IntakeConstants.kP; // Proportional gain (speed of correction)
-    config.Slot0.kD = Constants.IntakeConstants.kD; // Derivative gain (smoothness)
+    config.Slot0.kG = IntakeConstants.kG; // Gravity compensation
+    config.Slot0.kS = IntakeConstants.kS; // Static friction
+    config.Slot0.kP = IntakeConstants.kP; // Proportional gain (speed of correction)
+    config.Slot0.kD = IntakeConstants.kD; // Derivative gain (smoothness)
 
     // Motion limits from ArmConstants (TODO: CRITICAL - Set non-zero values!)
-    config.MotionMagic.MotionMagicCruiseVelocity = Constants.IntakeConstants.MOTION_MAGIC_CRUISE_VELOCITY; // Max speed
-    config.MotionMagic.MotionMagicAcceleration = Constants.IntakeConstants.MOTION_MAGIC_ACCELERATION; // How fast to speed up
-    intakeL.getConfigurator().apply(config);
-    intakeR.getConfigurator().apply(config);
+    config.MotionMagic.MotionMagicCruiseVelocity = IntakeConstants.MOTION_MAGIC_CRUISE_VELOCITY; // Max speed
+    config.MotionMagic.MotionMagicAcceleration = IntakeConstants.MOTION_MAGIC_ACCELERATION; // How fast to speed up
+    // intakeL.getConfigurator().apply(config);
+    // intakeR.getConfigurator().apply(config);
+    TalonFXUtil.applyConfigWithRetries(intakeR, config);
+    TalonFXUtil.applyConfigWithRetries(intakeL, config);
 
 
 
     pivotconfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-    pivotconfig.Slot0.kG = Constants.IntakeConstants.pkG; // Gravity compensation
-    pivotconfig.Slot0.kS = Constants.IntakeConstants.pkS; // Static friction
-    pivotconfig.Slot0.kP = Constants.IntakeConstants.pkP; // Proportional gain (speed of correction)
-    pivotconfig.Slot0.kD = Constants.IntakeConstants.pkD;
-    pivotconfig.MotionMagic.MotionMagicCruiseVelocity = Constants.IntakeConstants.pivot_MOTION_MAGIC_CRUISE_VELOCITY; // Max speed
-    pivotconfig.MotionMagic.MotionMagicAcceleration = Constants.IntakeConstants.pivot_MOTION_MAGIC_ACCELERATION; // How fast to speed up
-    pivotconfig.MotionMagic.MotionMagicJerk = Constants.IntakeConstants.MOTION_MAGIC_JERK; // How fast to speed up
-    intakePivot.getConfigurator().apply(pivotconfig);
+    pivotconfig.Slot0.kG = IntakeConstants.pkG; // Gravity compensation
+    pivotconfig.Slot0.kS = IntakeConstants.pkS; // Static friction
+    pivotconfig.Slot0.kP = IntakeConstants.pkP; // Proportional gain (speed of correction)
+    pivotconfig.Slot0.kD = IntakeConstants.pkD;
+    pivotconfig.MotionMagic.MotionMagicCruiseVelocity = IntakeConstants.pivot_MOTION_MAGIC_CRUISE_VELOCITY; // Max speed
+    pivotconfig.MotionMagic.MotionMagicAcceleration = IntakeConstants.pivot_MOTION_MAGIC_ACCELERATION; // How fast to speed up
+    pivotconfig.MotionMagic.MotionMagicJerk = IntakeConstants.MOTION_MAGIC_JERK; // How fast to speed up
+    //intakePivot.getConfigurator().apply(pivotconfig);
+    TalonFXUtil.applyConfigWithRetries(intakePivot, pivotconfig);
 
   }
 
@@ -115,7 +122,7 @@ public class intake extends SubsystemBase {
   return LoggedCommands.run("Running Intake",() -> runIntake(speed));
  }
  public Command unjammingIntakecCommand() {
-  return LoggedCommands.run("Unjamming Intake", () -> runIntake(Constants.IntakeConstants.unjammingspeed));
+  return LoggedCommands.run("Unjamming Intake", () -> runIntake(IntakeConstants.unjammingspeed));
  }
 
 
@@ -134,16 +141,19 @@ public class intake extends SubsystemBase {
   intakePivot.setControl(pivotIntakeVoltage.withPosition(position).withEnableFOC(true).withFeedForward(0.6));
  }
 
- public Command intakepivCommand(double position) {
+ public Command intakepivCommand(String position) {
 
-  if (position == Constants.IntakeConstants.pivotUp) {
+  if (position.equalsIgnoreCase("up")) {
     up_or_down = "up";
-  } else if (position == Constants.IntakeConstants.pivotDown) {
+    pivotPosition = IntakeConstants.pivotUp;
+  } else if (position.equalsIgnoreCase("down")) {
     up_or_down = "down";
+    pivotPosition = IntakeConstants.pivotDown;
   } else {
     up_or_down = "ERROR";
   }
-  return LoggedCommands.run("Pivoting Intake to " + position + " position", () -> intakepiv(position));
+
+  return LoggedCommands.run("Pivoting Intake to " + position + " position", () -> intakepiv(pivotPosition));
  }
 
 

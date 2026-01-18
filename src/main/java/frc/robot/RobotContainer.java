@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.autonomous.AutoCommands;
 import frc.robot.autonomous.AutoRoutines;
@@ -36,7 +37,7 @@ import frc.robot.constants.Constants.IntakeConstants;
 import frc.robot.constants.Constants.PhysicalConstants;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.Superstructure;
+//import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.flywheel.FlywheelSIM;
 import frc.robot.subsystems.intake.intake;
@@ -94,27 +95,27 @@ public class RobotContainer {
   /* Create subsystems (uses simulated versions when running in simulation) */
   public final intake arm = RobotBase.isSimulation() ? new IntakeSIM() : new intake();
   public final Flywheel flywheel = RobotBase.isSimulation() ? new FlywheelSIM() : new Flywheel();
-  private final Superstructure superstructure = new Superstructure(arm, flywheel);
+  //private final Superstructure superstructure = new Superstructure(arm, flywheel);
 
   // Vision camera for tracking robot position
   public final LimelightSubsystem limelight =
       new LimelightSubsystem("limelight", drivetrain);
 
   /* Autonomous mode selector */
-  private final SendableChooser<Command> autoChooser;
+  //private final SendableChooser<Command> autoChooser;
 
-  private final AutoRoutines autoRoutines;
+  // private final AutoRoutines autoRoutines;
 
   public RobotContainer() {
 
     // Set up autonomous routines
-    autoChooser = new SendableChooser<>();
-    autoRoutines = new AutoRoutines(autoCommands, superstructure);
+    //autoChooser = new SendableChooser<>();
+    // autoRoutines = new AutoRoutines(autoCommands, superstructure);
 
     // Add autonomous mode options to dashboard
-    autoChooser.addOption("Mobility Auto", autoRoutines.mobilityAuto());
+    //autoChooser.addOption("Mobility Auto", autoRoutines.mobilityAuto());
 
-    SmartDashboard.putData("Auto Mode", autoChooser);
+    //SmartDashboard.putData("Auto Mode", autoChooser);
 
     configureBindings();
   }
@@ -142,7 +143,8 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     /* Return whichever autonomous mode was selected on the dashboard */
-    return autoChooser.getSelected();
+    //return autoChooser.getSelected();
+    return Commands.print("NO AUTO SELECTED");
   }
 
   public Vector<N2> rescaleTranslation(double x, double y) {

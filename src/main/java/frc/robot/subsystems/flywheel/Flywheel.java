@@ -14,18 +14,21 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.logging.EpilogueBackend;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
-import frc.robot.constants.FlywheelConstants;
+import frc.robot.constants.Constants.FlywheelConstants;
+import frc.robot.constants.Constants.FlywheelConstants.FlywheelStates;
 import frc.robot.generated.TunerConstants;
+import frc.robot.utils.LoggedCommands;
 import frc.robot.utils.TalonFXUtil;
 
 @Logged
 public class Flywheel extends SubsystemBase {
 
   // Main motor that spins the flywheel (device ID 21)
-  protected final TalonFX leader = new TalonFX(21, TunerConstants.kCANBus);
+  protected final TalonFX shooter = new TalonFX(21);
 
   // Controller for spinning the flywheel at a target speed
   private final MotionMagicVelocityVoltage velocityOut = new MotionMagicVelocityVoltage(0);
@@ -52,7 +55,7 @@ public class Flywheel extends SubsystemBase {
     config.MotionMagic.MotionMagicAcceleration = FlywheelConstants.MOTION_MAGIC_ACCELERATION;
 
     // Apply configuration with retries
-    if (TalonFXUtil.applyConfigWithRetries(leader, config, 2)) {
+    if (TalonFXUtil.applyConfigWithRetries(shooter, config, 2)) {
       Robot.telemetry().log("Flywheel/Config", true);
     } else {
       Robot.telemetry().log("Flywheel/Config", false);
@@ -62,6 +65,10 @@ public class Flywheel extends SubsystemBase {
   @Override
   public void periodic() {
     // No periodic updates needed - control is entirely feedforward/feedback
+
+    SmartDashboard.putString("FlyWheel State",FlywheelConstants.getFlywheelState().name());
+    SmartDashboard.putNumber("FlyWheel Speed", getdoubleVelocity());
+    SmartDashboard.putNumber("FlyWheel Velocity", shooter.getVelocity().getValueAsDouble());
   }
 
   /**
@@ -71,8 +78,34 @@ public class Flywheel extends SubsystemBase {
    * @param velocity How fast to spin (rotations per second)
    */
   private void setVelocity(AngularVelocity velocity) {
-    leader.setControl(velocityOut.withVelocity(velocity));
+    shooter.setControl(velocityOut.withVelocity(velocity));
   }
+
+  private double getdoubleVelocity() {
+    return shooter.getVelocity().getValueAsDouble();
+  }
+
+
+  private Command runFlywheelCommand(double speed) {
+
+    if (getdoubleVelocity() < 5 && getdoubleVelocity() >= 0) {
+      FlywheelConstants.setFlywheelState(FlywheelStates.OFF);
+    } else if (getdoubleVelocity() >= 5 && getdoubleVelocity() < 100) {
+      FlywheelConstants.setFlywheelState(FlywheelStates.CHARGING);
+    } else if (getdoubleVelocity() >= 100) {
+      FlywheelConstants.setFlywheelState(FlywheelStates.READY);
+    } else {
+      FlywheelConstants.setFlywheelState(FlywheelStates.REVERSE);
+    }
+
+
+    return LoggedCommands.run("Speeding up Flywheel", () -> runFlywheel(speed));
+  }
+  
+  private void runFlywheel(double speed) {
+    shooter.set(speed);
+  }
+
 
   /**
    * Command to spin up the flywheel to shooting speed.
@@ -125,7 +158,7 @@ public class Flywheel extends SubsystemBase {
    * @return Current flywheel speed
    */
   public AngularVelocity getVelocity() {
-    return leader.getVelocity().getValue();
+    return shooter.getVelocity().getValue();
   }
 
   /**
@@ -148,6 +181,6 @@ public class Flywheel extends SubsystemBase {
 
   // Stop the flywheel motors (private to enforce Command-based control flow)
   private void stop() {
-    leader.stopMotor();
+    shooter.stopMotor();
   }
 }

@@ -64,7 +64,7 @@ public class FlywheelSIM extends Flywheel {
     config.Slot0.kP = 0.1; // Proportional gain (tune this!)
     config.MotionMagic.MotionMagicCruiseVelocity = 100.0; // Max velocity (RPS)
     config.MotionMagic.MotionMagicAcceleration = 400.0; // Max acceleration (RPS²)
-    TalonFXUtil.applyConfigWithRetries(leader, config);
+    TalonFXUtil.applyConfigWithRetries(shooter, config);
 
     LinearSystem<N2, N1, N2> linearSystem =
         LinearSystemId.createDCMotorSystem(
@@ -96,7 +96,7 @@ public class FlywheelSIM extends Flywheel {
   @Override
   public void simulationPeriodic() {
     // Feed the motor voltage from the controller into the physics simulation
-    flywheelSim.setInput(leader.getMotorVoltage().getValueAsDouble());
+    flywheelSim.setInput(shooter.getMotorVoltage().getValueAsDouble());
 
     // Step the simulation forward by one robot loop period
     flywheelSim.update(SIM_PERIOD_SECONDS);
@@ -114,12 +114,12 @@ public class FlywheelSIM extends Flywheel {
             .in(RotationsPerSecond);
 
     // Update the simulated motor encoder velocity
-    leader.getSimState().setRotorVelocity(motorVelocity);
+    shooter.getSimState().setRotorVelocity(motorVelocity);
 
     // Calculate motor position by integrating velocity over time
-    double currentPosition = leader.getRotorPosition().getValueAsDouble();
+    double currentPosition = shooter.getRotorPosition().getValueAsDouble();
     double newPosition = currentPosition + (motorVelocity * SIM_PERIOD_SECONDS);
-    leader.getSimState().setRawRotorPosition(newPosition);
+    shooter.getSimState().setRawRotorPosition(newPosition);
 
     // Animate the visual representation
     updateVisualization(velocityRadPerSec);
