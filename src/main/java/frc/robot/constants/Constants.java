@@ -1,5 +1,7 @@
 package frc.robot.constants;
 
+import frc.robot.utils.LoggedCommands;
+
 public class Constants {
     public static final class PhysicalConstants {
         
@@ -108,6 +110,9 @@ public class Constants {
     }
     public static final class FlywheelConstants {
 
+
+      private static FlywheelStates currentFlywheelState = FlywheelStates.OFF;
+
   // ==================== Shooting Speeds ====================
 
   /** How fast to spin for shooting (rotations per second) */
@@ -142,6 +147,24 @@ public class Constants {
 
   /** How fast the flywheel can speed up (rotations per second²) */
   public static final double MOTION_MAGIC_ACCELERATION = 1000.0;
+
+
+      public static enum FlywheelStates {
+        OFF,
+        CHARGING,
+        READY,
+        REVERSE
+      }
+
+  public static void setFlywheelState(FlywheelStates newState) {
+    currentFlywheelState = newState;
+    LoggedCommands.log("Robot state updated to: " + newState);
+  }
+
+  public static FlywheelStates getFlywheelState() {
+    return currentFlywheelState;
+  }
+
 
   private FlywheelConstants() {
     throw new UnsupportedOperationException("This is a utility class!");
