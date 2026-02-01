@@ -29,6 +29,7 @@ public class Flywheel extends SubsystemBase {
 
   // Main motor that spins the flywheel (device ID 21)
   protected final TalonFX shooter = new TalonFX(21);
+  private final TalonFX hood = new TalonFX(23);
 
   // Controller for spinning the flywheel at a target speed
   private final MotionMagicVelocityVoltage velocityOut = new MotionMagicVelocityVoltage(0);
@@ -38,12 +39,13 @@ public class Flywheel extends SubsystemBase {
 
   // Configuration settings for the flywheel motor
   protected TalonFXConfiguration config = new TalonFXConfiguration();
+  private TalonFXConfiguration hood_config = new TalonFXConfiguration();
 
   public Flywheel() {
     // Coast mode: Flywheel can spin freely by hand when disabled
     config.MotorOutput.NeutralMode = NeutralModeValue.Coast;
     // Set motor direction: positive power = counterclockwise spin
-    config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+    // config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
 
     // Control values from FlywheelConstants
     config.Slot0.kS = FlywheelConstants.kS; // Static friction
@@ -58,17 +60,53 @@ public class Flywheel extends SubsystemBase {
     if (TalonFXUtil.applyConfigWithRetries(shooter, config, 2)) {
       Robot.telemetry().log("Flywheel/Config", true);
     } else {
-      Robot.telemetry().log("Flywheel/Config", false);
+      Robot.telemetry().log("Flywheel/Config Failed", false);
     }
+
+    hood_config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+    // Set motor direction: positive power = counterclockwise spin
+    // config.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+
+    // Control values from FlywheelConstants
+    hood_config.Slot0.kS = FlywheelConstants.hoodkS; // Static friction
+    hood_config.Slot0.kV = FlywheelConstants.hoodkV; // Velocity feedforward
+    hood_config.Slot0.kP = FlywheelConstants.hoodkP; // Proportional gain
+
+    // Speed limits from FlywheelConstants
+    hood_config.MotionMagic.MotionMagicCruiseVelocity = FlywheelConstants.hood_MOTION_MAGIC_CRUISE_VELOCITY;
+    hood_config.MotionMagic.MotionMagicAcceleration = FlywheelConstants.hood_MOTION_MAGIC_ACCELERATION;
+
+
+
+    if (TalonFXUtil.applyConfigWithRetries(hood, hood_config, 2)) {
+      Robot.telemetry().log("Flywheel Hood/Config", true);
+    } else {
+      Robot.telemetry().log("Flywheel Hood/Config", false);
+    }
+
+
+
   }
 
   @Override
   public void periodic() {
     // No periodic updates needed - control is entirely feedforward/feedback
 
+    if (getdoubleVelocity() >= 0 && getdoubleVelocity() < 5) {
+      FlywheelConstants.setFlywheelState(FlywheelStates.OFF);
+    } else if (getdoubleVelocity() >= 5 && getdoubleVelocity() < 100) {
+      FlywheelConstants.setFlywheelState(FlywheelStates.CHARGING);
+    } else if (getdoubleVelocity() >= 100) {
+      FlywheelConstants.setFlywheelState(FlywheelStates.READY);
+    } else {
+      FlywheelConstants.setFlywheelState(FlywheelStates.REVERSE);
+    }
+
     SmartDashboard.putString("FlyWheel State",FlywheelConstants.getFlywheelState().name());
-    SmartDashboard.putNumber("FlyWheel Speed", getdoubleVelocity());
-    SmartDashboard.putNumber("FlyWheel Velocity", shooter.getVelocity().getValueAsDouble());
+    SmartDashboard.putNumber("FlyWheel Speed/Velocity", getdoubleVelocity());
+    SmartDashboard.putNumber("Hood Pivot", hood.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("Hood Velocity", hood.getVelocity().getValueAsDouble());
+
   }
 
   /**
@@ -87,18 +125,6 @@ public class Flywheel extends SubsystemBase {
 
 
   private Command runFlywheelCommand(double speed) {
-
-    if (getdoubleVelocity() < 5 && getdoubleVelocity() >= 0) {
-      FlywheelConstants.setFlywheelState(FlywheelStates.OFF);
-    } else if (getdoubleVelocity() >= 5 && getdoubleVelocity() < 100) {
-      FlywheelConstants.setFlywheelState(FlywheelStates.CHARGING);
-    } else if (getdoubleVelocity() >= 100) {
-      FlywheelConstants.setFlywheelState(FlywheelStates.READY);
-    } else {
-      FlywheelConstants.setFlywheelState(FlywheelStates.REVERSE);
-    }
-
-
     return LoggedCommands.run("Speeding up Flywheel", () -> runFlywheel(speed));
   }
   
@@ -122,7 +148,7 @@ public class Flywheel extends SubsystemBase {
    * @return Command that spins flywheel at amp speed
    */
   public Command ampSpeed() {
-    return runOnce(() -> setVelocity(RotationsPerSecond.of(FlywheelConstants.AMP_SPEED_RPS)));
+    return runOnce(() -> setVelocity(RotationsPerSecond.of(FlywheelConstants.amp_speed)));
   }
 
   /**
@@ -131,7 +157,7 @@ public class Flywheel extends SubsystemBase {
    * @return Command that spins flywheel at far speed
    */
   public Command farSpeed() {
-    return runOnce(() -> setVelocity(RotationsPerSecond.of(FlywheelConstants.FAR_SHOOTING_SPEED_RPS)));
+    return runOnce(() -> setVelocity(RotationsPerSecond.of(FlywheelConstants.far_speed)));
   }
 
   /**

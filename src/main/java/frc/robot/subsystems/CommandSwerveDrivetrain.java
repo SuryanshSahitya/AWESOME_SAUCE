@@ -21,6 +21,8 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.AutoLogOutput;
+
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements Subsystem so it can easily
  * be used in command-based projects.
@@ -60,7 +62,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
    *
    * <p>This constructs the underlying hardware devices, so users should not construct the devices
    * themselves. If they need the devices, they can access them through getters in the classes.
-   *
+   * 
    * @param drivetrainConstants Drivetrain-wide constants for the swerve drive
    * @param odometryUpdateFrequency The frequency to run the odometry loop. If unspecified or set to
    *     0 Hz, this is 250 Hz on CAN FD, and 100 Hz on CAN 2.0.
@@ -75,7 +77,22 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       startSimThread();
     }
   }
+    /** Returns the current odometry pose. */
+  // @AutoLogOutput(key = "Odometry/Robot")
+  // public Pose2d getPose() {
+  //   if (estimatorTrigger.getAsBoolean()) {
+  //     return poseEstimator.getEstimatedPosition();
+  //   }
+  //   return inputs.pose;
+  // }
 
+  // public Rotation2d getRotation() {
+  //   return getPose().getRotation();
+  // }
+
+
+
+  
   /**
    * Constructs a CTRE SwerveDrivetrain using the specified constants.
    *
